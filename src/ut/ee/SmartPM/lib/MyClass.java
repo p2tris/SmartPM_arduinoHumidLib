@@ -43,7 +43,7 @@ public class MyClass implements LibInterface{
         UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     // Insert your bluetooth devices MAC address
-    private static String address = "00:0E:EA:CF:18:AB";
+    private static ArrayList<String> addresses = new ArrayList<String>();
 	    
    	@Override
 	public String useMyLib(Context context, TextView mAutoLabel, String rules) {
@@ -53,43 +53,66 @@ public class MyClass implements LibInterface{
 		btAdapter = BluetoothAdapter.getDefaultAdapter();
 	    checkBTState();
 	    
-	 // Set up a pointer to the remote node using it's address.
-	    BluetoothDevice device = btAdapter.getRemoteDevice(address);
-	  
-	    // Two things are needed to make a connection:
-	    //   A MAC address, which we got above.
-	    //   A Service ID or UUID.  In this case we are using the
-	    //     UUID for SPP.
-	    try {
-	      btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
-	    } catch (IOException e) {
-	      errorExit("Fatal Error", "In onResume() and socket create failed: " + e.getMessage() + ".");
-	    }
-	  
-	    // Discovery is resource intensive.  Make sure it isn't going on
-	    // when you attempt to connect and pass your message.
-	    btAdapter.cancelDiscovery();
-	  
-	    // Establish the connection.  This will block until it connects.
-	    Log.d(TAG, "...Connecting to Remote...");
-	    try {
-	      btSocket.connect();
-	      Log.d(TAG, "...Connection established and data link opened...");
-	    } catch (IOException e) {
-	      try {
-	        btSocket.close();
-	      } catch (IOException e2) {
-	        errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
-	      }
-	    }
+	    // add MAC addresses of trusted Arduino BT devices here! 
+	    // TODO: Dynamic device selection!
+	    addresses.add("00:0E:EA:CF:18:AB");
+	    addresses.add("00:0E:EA:CF:16:FD");
 	    
-	    // Create a data stream so we can talk to server.
-	    Log.d(TAG, "...Creating Socket...");
-
-	    try {
-	      outStream = btSocket.getOutputStream();
-	    } catch (IOException e) {
-	      errorExit("Fatal Error", "In onResume() and output stream creation failed:" + e.getMessage() + ".");
+		//private static String address = "00:0E:EA:CF:16:FD";
+		for (int i = 0; i < addresses.size(); i++){
+		    	// Set up a pointer to the remote node using it's address.
+			iterate: {
+			    BluetoothDevice device = btAdapter.getRemoteDevice(addresses.get(i));
+			    Log.d(TAG, addresses.get(i));
+			    Log.d(TAG, device.toString());
+			    
+			    // Two things are needed to make a connection:
+			    //   A MAC address, which we got above.
+			    //   A Service ID or UUID.  In this case we are using the
+			    //     UUID for SPP.
+			    try {
+			      btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
+			    } catch (IOException e) {
+				    Log.d(TAG, "E1");
+				    break iterate;
+			      //errorExit("Fatal Error", "In onResume() and socket create failed: " + e.getMessage() + ".");
+			    }
+			  
+			    // Discovery is resource intensive.  Make sure it isn't going on
+			    // when you attempt to connect and pass your message.
+			    btAdapter.cancelDiscovery();
+			  
+			    // Establish the connection.  This will block until it connects.
+			    Log.d(TAG, "...Connecting to Remote...");
+			    try {
+			      btSocket.connect();
+			      Log.d(TAG, "...Connection established and data link opened...");
+			    } catch (IOException e) {
+			      try {
+			        btSocket.close();
+					Log.d(TAG, "E2");
+			        break iterate;
+			      } catch (IOException e2) {
+					  Log.d(TAG, "E3");
+					  break iterate;
+			        //errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
+			      }
+			    }
+			    
+			    // Create a data stream so we can talk to server.
+			    Log.d(TAG, "...Creating Socket...");
+	
+			    try {
+			      outStream = btSocket.getOutputStream();
+			    } catch (IOException e) {
+				    Log.d(TAG, "E4");
+				    break iterate;
+			      //errorExit("Fatal Error", "In onResume() and output stream creation failed:" + e.getMessage() + ".");
+			    }
+			    Log.d(TAG, "BREAK");
+			    break;
+			    
+		    }
 	    }
 	    
 	    beginListenForData();
