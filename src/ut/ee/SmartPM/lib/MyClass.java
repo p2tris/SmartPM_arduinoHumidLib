@@ -23,7 +23,7 @@ public class MyClass implements LibInterface{
 	private final String libName = "Arduino";
 	private final String libType = "String";
 	List<rulesObject<Double, Double, String>> volList = new ArrayList<rulesObject<Double, Double, String>>();
-	String sensor_type;
+	String sensor_type = "";
 	
 	private static final String TAG = "ArduinoBT";
 	  
@@ -123,11 +123,11 @@ public class MyClass implements LibInterface{
 
 	private void updateDisplay(String status) {
 		Boolean isListed = false;
-		Log.d("Sensor type", sensor_type);
-		Log.d("input", status);
+		sensor_type = volList.get(0).getName();
+		Log.d("Sensor type", sensor_type + ".");
 		String[] statusList = status.trim().split("=");
-		Log.d("statuslist", statusList[0] + " and " + statusList[1]);
-		if(statusList[0].equals(sensor_type)){
+		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
+		if((statusList[0].toString()).equals(sensor_type)){
 			for (rulesObject<Double, Double, String> rulesObject : volList) {
 				if ((Double.parseDouble(statusList[1]) > rulesObject.getLow()) && (Double.parseDouble(statusList[1]) < rulesObject.getHigh())) {
 					mAutoLabel.setText(rulesObject.getName());
@@ -218,8 +218,8 @@ public class MyClass implements LibInterface{
 	                                  byte[] encodedBytes = new byte[readBufferPosition];
 	                                  System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
 	                                  final String data = new String(encodedBytes, "US-ASCII");
-	                                  
-	                            	  Log.d(TAG, data);
+//	                                  
+//	                            	  Log.d(TAG, data);
 
 	                                  readBufferPosition = 0;
 	                                  
