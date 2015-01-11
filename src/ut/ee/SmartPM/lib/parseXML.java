@@ -19,9 +19,11 @@ import android.util.Log;
 public class parseXML extends AsyncTask<String, Void, Void> {
 	
 	List<rulesObject<Double, Double, String>> volList = new ArrayList<rulesObject<Double, Double, String>>();
+	String sensor_type;
 
-	public parseXML(List<rulesObject<Double, Double, String>> volList) {
+	public parseXML(List<rulesObject<Double, Double, String>> volList, String sensor_type) {
 		this.volList = volList;
+		this.sensor_type = sensor_type;
 	}
 	
 	@Override
@@ -39,6 +41,11 @@ public class parseXML extends AsyncTask<String, Void, Void> {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(url.openStream()));
             doc.getDocumentElement().normalize();
+            
+            NodeList lib = doc.getElementsByTagName("lib");
+            Node libnode = lib.item(0);
+            sensor_type = libnode.getAttributes().getNamedItem("keyword").getNodeValue();
+            
 
             NodeList nodeList = doc.getElementsByTagName("data_value");
 

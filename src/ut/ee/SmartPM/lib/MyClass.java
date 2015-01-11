@@ -20,9 +20,10 @@ import android.widget.Toast;
 
 public class MyClass implements LibInterface{
 
-	private final String libName = "Humidity";
+	private final String libName = "Arduino";
 	private final String libType = "String";
 	List<rulesObject<Double, Double, String>> volList = new ArrayList<rulesObject<Double, Double, String>>();
+	String sensor_type;
 	
 	private static final String TAG = "ArduinoBT";
 	  
@@ -49,7 +50,7 @@ public class MyClass implements LibInterface{
 	public String useMyLib(Context context, TextView mAutoLabel, String rules) {
    		this.mAutoLabel = mAutoLabel;
    		this.context = context;
-		new parseXML(volList).execute(rules);
+		new parseXML(volList, sensor_type).execute(rules);
 		btAdapter = BluetoothAdapter.getDefaultAdapter();
 	    checkBTState();
 	    
@@ -120,20 +121,29 @@ public class MyClass implements LibInterface{
 		return null;
    	}
 
-	private void updateDisplay(double status) {
+	private void updateDisplay(String status) {
 		Boolean isListed = false;
-	    for (rulesObject<Double, Double, String> rulesObject : volList) {
-			if ((status > rulesObject.getLow()) && (status < rulesObject.getHigh())) {
-				mAutoLabel.setText(rulesObject.getName());
-				isListed = true;
-				return;
+		Log.d("Sensor type", sensor_type);
+		Log.d("input", status);
+		String[] statusList = status.trim().split("=");
+		Log.d("statuslist", statusList[0] + " and " + statusList[1]);
+		if(statusList[0].equals(sensor_type)){
+			for (rulesObject<Double, Double, String> rulesObject : volList) {
+				if ((Double.parseDouble(statusList[1]) > rulesObject.getLow()) && (Double.parseDouble(statusList[1]) < rulesObject.getHigh())) {
+					mAutoLabel.setText(rulesObject.getName());
+					isListed = true;
+					return;
+				}
 			}
+		    if(!isListed){
+		    	String outVol = "NotMapped level: " + status;
+		    	mAutoLabel.setText(outVol);
+		    }
+		    
+		    mAutoLabel.setText(String.valueOf(status));
 		}
-	    if(!isListed){
-	    	String outVol = "NotMapped level: " + status;
-	    	mAutoLabel.setText(outVol);
-	    }
-	        mAutoLabel.setText(String.valueOf(status));
+	    	
+	        
 	}
 
 	@Override
@@ -217,7 +227,7 @@ public class MyClass implements LibInterface{
 	                                  {
 	                                      public void run()
 	                                      {
-	                                    	  updateDisplay(Double.parseDouble(data));
+	                                    	  updateDisplay(data);
 	                                      }
 	                                  });
 	                              }

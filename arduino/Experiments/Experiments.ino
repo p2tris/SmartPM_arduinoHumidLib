@@ -30,10 +30,19 @@ void setup()
 
 void loop()
 {
-  LEDOFF();
-  float humidity = TH02.ReadHumidity();
+  float humidity = TH02.ReadHumidity(); 
+  blueToothSerial.print("hum=");   
   blueToothSerial.println(humidity);
+  
+  float temper = TH02.ReadTemperature();
+  blueToothSerial.print("temp=");   
+  blueToothSerial.println(temper);
+  
+  Serial.print("hum=");
   Serial.println(humidity);
+  Serial.print("temp=");
+  Serial.println(temper);
+
   delay(1000);
   
 }
