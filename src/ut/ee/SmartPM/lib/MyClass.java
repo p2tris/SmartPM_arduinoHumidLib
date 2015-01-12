@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import ut.ee.SmartPM.R;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -15,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -122,28 +124,41 @@ public class MyClass implements LibInterface{
    	}
 
 	private void updateDisplay(String status) {
-		Boolean isListed = false;
-		sensor_type = volList.get(0).getName();
-//		Log.d("Sensor type", sensor_type + ".");
-		String[] statusList = status.trim().split("=");
-//		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
-		if((statusList[0].toString()).equals(sensor_type)){
-			for (rulesObject<Double, Double, String> rulesObject : volList) {
-				if ((Double.parseDouble(statusList[1]) > rulesObject.getLow()) && (Double.parseDouble(statusList[1]) < rulesObject.getHigh())) {
-					mAutoLabel.setText(rulesObject.getName());
-					isListed = true;
-					return;
-				}
+		if(mAutoLabel.isShown() == false){
+			try {
+				Log.d("EXIT","autolable deleted");
+				workerThread.interrupt();
+				workerThread=null;
+				Thread.currentThread().interrupt();
+				btSocket.close();
+				Log.d("EXIT","Socet closed");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		    if(!isListed){
-		    	String outVol = "NotMapped level: " + status;
-		    	mAutoLabel.setText(outVol);
-		    }
-		    
-		    mAutoLabel.setText(String.valueOf(status));
+		} else {
+//			Log.d("TextView STATUS", mAutoLabel.);
+			Boolean isListed = false;
+			sensor_type = volList.get(0).getName();
+	//		Log.d("Sensor type", sensor_type + ".");
+			String[] statusList = status.trim().split("=");
+	//		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
+			if((statusList[0].toString()).equals(sensor_type)){
+				for (rulesObject<Double, Double, String> rulesObject : volList) {
+					if ((Double.parseDouble(statusList[1]) > rulesObject.getLow()) && (Double.parseDouble(statusList[1]) < rulesObject.getHigh())) {
+						mAutoLabel.setText(rulesObject.getName());
+						isListed = true;
+						return;
+					}
+				}
+			    if(!isListed){
+			    	String outVol = "NotMapped level: " + status;
+			    	mAutoLabel.setText(outVol);
+			    }
+			    
+			    mAutoLabel.setText(String.valueOf(status));
+			}
 		}
-	    	
-	        
 	}
 
 	@Override
