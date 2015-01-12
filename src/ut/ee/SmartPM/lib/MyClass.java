@@ -124,9 +124,9 @@ public class MyClass implements LibInterface{
 	private void updateDisplay(String status) {
 		Boolean isListed = false;
 		sensor_type = volList.get(0).getName();
-		Log.d("Sensor type", sensor_type + ".");
+//		Log.d("Sensor type", sensor_type + ".");
 		String[] statusList = status.trim().split("=");
-		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
+//		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
 		if((statusList[0].toString()).equals(sensor_type)){
 			for (rulesObject<Double, Double, String> rulesObject : volList) {
 				if ((Double.parseDouble(statusList[1]) > rulesObject.getLow()) && (Double.parseDouble(statusList[1]) < rulesObject.getHigh())) {

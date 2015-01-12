@@ -62,7 +62,7 @@ void setupBlueToothConnection()
   delay(2000); 
   blueToothSerial.print("AT+NAMESmartPM");    // set the bluetooth name as "SeeedBTSlave" ,the length of bluetooth name must less than 12 characters.
   delay(400);
-  blueToothSerial.print("AT+PIN1111");             // set the pair code to connect 
+  blueToothSerial.print("AT+PIN1234");             // set the pair code to connect 
   delay(400);
   blueToothSerial.print("AT+AUTH1");             //
   delay(400);
