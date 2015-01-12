@@ -62,6 +62,7 @@ public class MyClass implements LibInterface{
 	    addresses.add("00:0E:EA:CF:16:FD");
 	    
 		//private static String address = "00:0E:EA:CF:16:FD";
+	    int j=0;
 		for (int i = 0; i < addresses.size(); i++){
 		    	// Set up a pointer to the remote node using it's address.
 			iterate: {
@@ -94,6 +95,11 @@ public class MyClass implements LibInterface{
 			      try {
 			        btSocket.close();
 					Log.d(TAG, "E2");
+					// loop 3 times because first time connection might not be successful
+					if(j < 3 && i == (addresses.size()-1)){
+						j++;
+						i=0;
+					}
 			        break iterate;
 			      } catch (IOException e2) {
 					  Log.d(TAG, "E3");
