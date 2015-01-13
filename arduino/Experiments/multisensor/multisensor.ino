@@ -51,7 +51,7 @@ void loop()
   
   // HCHO sensor connected to A0
   int hchoSensorValue=analogRead(A0);
-  float hchovol=hchoSensorValue*4.95/1023;
+  float hchovol=(hchoSensorValue*4.95/1023)*100;
   blueToothSerial.print("hchovol=");
   blueToothSerial.println(hchovol);
   // Print also to serial
@@ -66,7 +66,7 @@ void loop()
   // MQ sensor connected to A1
   float mqvol;
   int mqSensorValue = analogRead(A1);
-  mqvol=(float)mqSensorValue/1024*Vref;
+  mqvol=((float)mqSensorValue/1024*Vref)*100;
   blueToothSerial.print("mqvol=");
   blueToothSerial.println(mqvol);
   // Print also to serial
