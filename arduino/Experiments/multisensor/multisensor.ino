@@ -34,7 +34,7 @@ void setup()
 void loop()
 {
   // Get humidity data
-  float humidity = TH02.ReadHumidity(); 
+  float humidity = TH02.ReadHumidity();
   blueToothSerial.print("hum=");   
   blueToothSerial.println(humidity);
   // Print also to serial

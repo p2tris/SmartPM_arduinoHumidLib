@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import ut.ee.SmartPM.R;
@@ -14,6 +15,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +30,7 @@ public class MyClass implements LibInterface{
 	String sensor_type = "";
 	
 	private static final String TAG = "ArduinoBT";
+	public static final String PREFS_NAME = "MyPrefsFile";
 	  
 	int readBufferPosition;
 	byte[] readBuffer;
@@ -47,109 +50,205 @@ public class MyClass implements LibInterface{
 
     // Insert your bluetooth devices MAC address
     private static ArrayList<String> addresses = new ArrayList<String>();
+    
+	final Handler existinghandler = new Handler();
+
 	    
    	@Override
-	public String useMyLib(Context context, TextView mAutoLabel, String rules) {
+	public String useMyLib(Context context, final TextView mAutoLabel, String rules) {
    		this.mAutoLabel = mAutoLabel;
    		this.context = context;
 		new parseXML(volList, sensor_type).execute(rules);
-		btAdapter = BluetoothAdapter.getDefaultAdapter();
-	    checkBTState();
-	    
-	    // add MAC addresses of trusted Arduino BT devices here! 
-	    // TODO: Dynamic device selection!
-	    addresses.add("00:0E:EA:CF:18:AB");
-	    addresses.add("00:0E:EA:CF:16:FD");
-	    
-		//private static String address = "00:0E:EA:CF:16:FD";
-	    int j=0;
-		for (int i = 0; i < addresses.size(); i++){
-		    	// Set up a pointer to the remote node using it's address.
-			iterate: {
-			    BluetoothDevice device = btAdapter.getRemoteDevice(addresses.get(i));
-			    Log.d(TAG, addresses.get(i));
-			    Log.d(TAG, device.toString());
-			    
-			    // Two things are needed to make a connection:
-			    //   A MAC address, which we got above.
-			    //   A Service ID or UUID.  In this case we are using the
-			    //     UUID for SPP.
-			    try {
-			      btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
-			    } catch (IOException e) {
-				    Log.d(TAG, "E1");
-				    break iterate;
-			      //errorExit("Fatal Error", "In onResume() and socket create failed: " + e.getMessage() + ".");
+		
+		SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
+		if (settings.getAll().size() > 1) {
+			
+
+			final Runnable r = new Runnable() {
+			    public void run() {
+			        updateDisplayFromSharedPref();
+			        // TODO: exit when task finished!
+			        if(mAutoLabel.isShown() == true){
+			        	existinghandler.postDelayed(this, 1000);
+			        }
 			    }
-			  
-			    // Discovery is resource intensive.  Make sure it isn't going on
-			    // when you attempt to connect and pass your message.
-			    btAdapter.cancelDiscovery();
-			  
-			    // Establish the connection.  This will block until it connects.
-			    Log.d(TAG, "...Connecting to Remote...");
-			    try {
-			      btSocket.connect();
-			      Log.d(TAG, "...Connection established and data link opened...");
-			    } catch (IOException e) {
-			      try {
-			        btSocket.close();
-					Log.d(TAG, "E2");
-					// loop 3 times because first time connection might not be successful
-					if(j < 3 && i == (addresses.size()-1)){
-						j++;
-						i=0;
-					}
-			        break iterate;
-			      } catch (IOException e2) {
-					  Log.d(TAG, "E3");
-					  break iterate;
-			        //errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
-			      }
+			};
+
+			existinghandler.postDelayed(r, 1000);
+		} else {
+			// for the first BT run to make other runs wait for values
+		    SharedPreferences.Editor editor = settings.edit();
+		    editor.putString("ARDUINO blank", "0");
+		 // Commit the edits!
+		    editor.commit();
+		    
+			btAdapter = BluetoothAdapter.getDefaultAdapter();
+		    checkBTState();
+		    
+		    // add MAC addresses of trusted Arduino BT devices here! 
+		    // TODO: Dynamic device selection!
+		    addresses.add("00:0E:EA:CF:18:AB");
+		    addresses.add("00:0E:EA:CF:16:FD");
+		    
+			//private static String address = "00:0E:EA:CF:16:FD";
+		    int j=0;
+			for (int i = 0; i < addresses.size(); i++){
+			    	// Set up a pointer to the remote node using it's address.
+				iterate: {
+				    BluetoothDevice device = btAdapter.getRemoteDevice(addresses.get(i));
+				    Log.d(TAG, addresses.get(i));
+				    Log.d(TAG, device.toString());
+				    
+				    // Two things are needed to make a connection:
+				    //   A MAC address, which we got above.
+				    //   A Service ID or UUID.  In this case we are using the
+				    //     UUID for SPP.
+				    try {
+				      btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
+				    } catch (IOException e) {
+					    Log.d(TAG, "E1");
+					    break iterate;
+				      //errorExit("Fatal Error", "In onResume() and socket create failed: " + e.getMessage() + ".");
+				    }
+				  
+				    // Discovery is resource intensive.  Make sure it isn't going on
+				    // when you attempt to connect and pass your message.
+				    btAdapter.cancelDiscovery();
+				  
+				    // Establish the connection.  This will block until it connects.
+				    Log.d(TAG, "...Connecting to Remote...");
+				    try {
+				      btSocket.connect();
+				      Log.d(TAG, "...Connection established and data link opened...");
+				    } catch (IOException e) {
+				      try {
+				        btSocket.close();
+						Log.d(TAG, "E2");
+						// loop 3 times because first time connection might not be successful
+						if(j < 3 && i == (addresses.size()-1)){
+							j++;
+							i=0;
+						}
+				        break iterate;
+				      } catch (IOException e2) {
+						  Log.d(TAG, "E3");
+						  break iterate;
+				        //errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
+				      }
+				    }
+				    
+				    // Create a data stream so we can talk to server.
+				    Log.d(TAG, "...Creating Socket...");
+		
+				    try {
+				      outStream = btSocket.getOutputStream();
+				    } catch (IOException e) {
+					    Log.d(TAG, "E4");
+					    break iterate;
+				      //errorExit("Fatal Error", "In onResume() and output stream creation failed:" + e.getMessage() + ".");
+				    }
+				    Log.d(TAG, "BREAK");
+				    break;
+				    
 			    }
-			    
-			    // Create a data stream so we can talk to server.
-			    Log.d(TAG, "...Creating Socket...");
-	
-			    try {
-			      outStream = btSocket.getOutputStream();
-			    } catch (IOException e) {
-				    Log.d(TAG, "E4");
-				    break iterate;
-			      //errorExit("Fatal Error", "In onResume() and output stream creation failed:" + e.getMessage() + ".");
-			    }
-			    Log.d(TAG, "BREAK");
-			    break;
-			    
 		    }
-	    }
-	    
-	    beginListenForData();
+		    
+		    beginListenForData();
+		    
+		}
 		
 		return null;
    	}
+   	
+   	private void updateDisplayFromSharedPref() {
+		if(mAutoLabel.isShown() == false){
+			Log.d("EXIT","autolable deleted");
+//			workerThread.interrupt();
+//			workerThread=null;
+			
+			existinghandler.removeCallbacksAndMessages(null);
+			
+			SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
+		    SharedPreferences.Editor editor = settings.edit();
+		    		    
+			Map<String,?> keys = settings.getAll();
+
+			for(Map.Entry<String,?> entry : keys.entrySet()){
+				if(!(entry.getKey()).equals("name")){
+					editor.remove(entry.getKey());
+					editor.commit();
+				}          
+			 }
+			
+			Thread.currentThread().interrupt();
+			//btSocket.close();
+			//Log.d("EXIT","Socet closed");
+		} else {
+//			Log.d("TextView STATUS", mAutoLabel.);
+			Boolean isListed = false;
+			sensor_type = volList.get(0).getName();
+	//		Log.d("Sensor type", sensor_type + ".");
+			
+			SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
+	        String sensorValueFromShared = settings.getString(sensor_type, "1.0");
+		    
+	//		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
+		    
+				for (rulesObject<Double, Double, String> rulesObject : volList) {
+					if ((Double.parseDouble(sensorValueFromShared) > rulesObject.getLow()) && (Double.parseDouble(sensorValueFromShared) < rulesObject.getHigh())) {
+						mAutoLabel.setText(rulesObject.getName());
+						isListed = true;
+						return;
+					}
+				}
+			    if(!isListed){
+			    	String outVol = "NotMapped level: " + sensorValueFromShared;
+			    	mAutoLabel.setText(outVol);
+			    }
+			    
+			    mAutoLabel.setText(String.valueOf(sensorValueFromShared));
+			
+		}
+	}
 
 	private void updateDisplay(String status) {
 		if(mAutoLabel.isShown() == false){
+			Log.d("111", "Fst");
 			try {
 				Log.d("EXIT","autolable deleted");
+				existinghandler.removeCallbacksAndMessages(null);
 				workerThread.interrupt();
 				workerThread=null;
+				Log.d("CurrentT","TAKE DOWN");
 				Thread.currentThread().interrupt();
+				Log.d("CurrentT","DOWN");
 				btSocket.close();
 				Log.d("EXIT","Socet closed");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			Log.d("222","Snd");
 		} else {
 //			Log.d("TextView STATUS", mAutoLabel.);
 			Boolean isListed = false;
 			sensor_type = volList.get(0).getName();
 	//		Log.d("Sensor type", sensor_type + ".");
 			String[] statusList = status.trim().split("=");
+			
+			SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
+		    SharedPreferences.Editor editor = settings.edit();
+		    if (settings.contains(statusList[0].toString())) {
+		    	editor.putString(statusList[0].toString(), statusList[1].toString());
+				 // Commit the edits!
+				 editor.apply();
+			} else {
+				editor.putString(statusList[0].toString(), statusList[1].toString());
+			 // Commit the edits!
+			    editor.commit();
+			}
 	//		Log.d("statuslist", statusList[0] + " and " + statusList[1] + " and ." + sensor_type + ".");
-			if((statusList[0].toString()).equals(sensor_type)){
+		    if((statusList[0].toString()).equals(sensor_type)){
 				for (rulesObject<Double, Double, String> rulesObject : volList) {
 					if ((Double.parseDouble(statusList[1]) > rulesObject.getLow()) && (Double.parseDouble(statusList[1]) < rulesObject.getHigh())) {
 						mAutoLabel.setText(rulesObject.getName());
@@ -162,7 +261,7 @@ public class MyClass implements LibInterface{
 			    	mAutoLabel.setText(outVol);
 			    }
 			    
-			    mAutoLabel.setText(String.valueOf(status));
+			    mAutoLabel.setText(String.valueOf(statusList[1]));
 			}
 		}
 	}
@@ -211,7 +310,6 @@ public class MyClass implements LibInterface{
 			e.printStackTrace();
 		}
 		  Log.d(TAG, "...beginListenForData...");
-	      final Handler handler = new Handler(); 
 	      final byte delimiter = 10; //This is the ASCII code for a newline character
 	      
 	      readBufferPosition = 0;
@@ -244,7 +342,7 @@ public class MyClass implements LibInterface{
 
 	                                  readBufferPosition = 0;
 	                                  
-	                                  handler.post(new Runnable()
+	                                  existinghandler.post(new Runnable()
 	                                  {
 	                                      public void run()
 	                                      {
