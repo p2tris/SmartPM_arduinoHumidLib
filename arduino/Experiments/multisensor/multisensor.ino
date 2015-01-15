@@ -58,23 +58,46 @@ void loop()
   Serial.print("hcho=");
   Serial.println(hchovol);
   
-  // MQ sensors: 
   // MQ-2：Combustible Gas, Smoke
-  // MQ-3：Alcohol and Benzine
-  // MQ-5：LPG, Natural Gas, Town Gas
-  // MQ-9：LPG, CO, CH4
-  // MQ sensor connected to A1
-  float mqvol;
-  int mqSensorValue = analogRead(A1);
-  mqvol=((float)mqSensorValue/1024*Vref)*100;
-  blueToothSerial.print("mq3="); // change or add other MQ sensors accordingly
-  blueToothSerial.println(mqvol);
+  float mq2vol;
+  int mq2SensorValue = analogRead(A1);
+  mq2vol=((float)mq2SensorValue/1024*Vref)*100;
+  blueToothSerial.print("mq2="); 
+  blueToothSerial.println(mq2vol);
   // Print also to serial
-  Serial.print("mq3="); // change or add other MQ sensors accordingly
-  Serial.println(mqvol);
+  Serial.print("mq2="); 
+  Serial.println(mq2vol);
   
+  // MQ-3：Alcohol and Benzine
+  float mq3vol;
+  int mq3SensorValue = analogRead(A2);
+  mq3vol=((float)mq3SensorValue/1024*Vref)*100;
+  blueToothSerial.print("mq3="); 
+  blueToothSerial.println(mq3vol);
+  // Print also to serial
+  Serial.print("mq3="); 
+  Serial.println(mq3vol);
+
+  // MQ-5：LPG, Natural Gas, Town Gas
+  float mq5vol;
+  int mq5SensorValue = analogRead(A3);
+  mq5vol=((float)mq5SensorValue/1024*Vref)*100;
+  blueToothSerial.print("mq5=");
+  blueToothSerial.println(mq5vol);
+  // Print also to serial
+  Serial.print("mq5=");
+  Serial.println(mq5vol);  
+  
+  // MQ-9：LPG, CO, CH4
+  float mq9vol;
+  int mq9SensorValue = analogRead(A4);
+  mq9vol=((float)mq9SensorValue/1024*Vref)*100;
+  blueToothSerial.print("mq9=");
+  blueToothSerial.println(mq9vol);
+  // Print also to serial
+  Serial.print("mq9=");
+  Serial.println(mq9vol);
   delay(1000);
-  
 }
 
 /***************************************************************************
@@ -88,8 +111,8 @@ void setupBlueToothConnection()
   blueToothSerial.begin(9600);
   blueToothSerial.print("AT");
   delay(400); 
-  blueToothSerial.print("AT+DEFAULT");             // Restore all setup value to factory setup
-  delay(2000); 
+  // blueToothSerial.print("AT+DEFAULT");             // Restore all setup value to factory setup
+  // delay(2000); 
   blueToothSerial.print("AT+NAMESmartPM");    // set the bluetooth name as "SeeedBTSlave" ,the length of bluetooth name must less than 12 characters.
   delay(400);
   blueToothSerial.print("AT+PIN1234");             // set the pair code to connect 
