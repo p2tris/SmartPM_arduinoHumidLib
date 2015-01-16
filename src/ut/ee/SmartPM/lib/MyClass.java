@@ -61,7 +61,7 @@ public class MyClass implements LibInterface{
 		new parseXML(volList, sensor_type).execute(rules);
 		
 		SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
-		if (settings.getAll().size() > 1) {
+		if (settings.contains("ARDUINOEXISTS")) {
 			
 
 			final Runnable r = new Runnable() {
@@ -78,7 +78,7 @@ public class MyClass implements LibInterface{
 		} else {
 			// for the first BT run to make other runs wait for values
 		    SharedPreferences.Editor editor = settings.edit();
-		    editor.putString("ARDUINO blank", "0");
+		    editor.putString("ARDUINOEXISTS", "1");
 		 // Commit the edits!
 		    editor.commit();
 		    
@@ -175,8 +175,14 @@ public class MyClass implements LibInterface{
 
 			for(Map.Entry<String,?> entry : keys.entrySet()){
 				if(!(entry.getKey()).equals("name")){
-					editor.remove(entry.getKey());
-					editor.commit();
+					if(!(entry.getKey()).equals("message")){
+						if(!(entry.getKey()).equals("taskName")){
+							if(!(entry.getKey()).equals("started")){
+								editor.remove(entry.getKey());
+								editor.commit();								
+							}
+						}
+					}
 				}          
 			 }
 			

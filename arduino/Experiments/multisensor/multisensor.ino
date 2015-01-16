@@ -97,7 +97,7 @@ void loop()
   // Print also to serial
   Serial.print("mq9=");
   Serial.println(mq9vol);
-  delay(1000);
+  delay(2000);
 }
 
 /***************************************************************************
