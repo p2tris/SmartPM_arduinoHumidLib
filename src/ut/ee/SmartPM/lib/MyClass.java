@@ -153,7 +153,11 @@ public class MyClass implements LibInterface{
 			    }
 		    }
 		    
-		    beginListenForData();
+			if(btSocket.isConnected()){
+			    beginListenForData();
+			} else {
+		        mAutoLabel.setText("1.0");
+			}
 		    
 		}
 		
