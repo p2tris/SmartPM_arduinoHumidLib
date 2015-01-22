@@ -125,7 +125,7 @@ public class MyClass implements LibInterface{
 				        btSocket.close();
 						Log.d(TAG, "E2");
 						// loop 3 times because first time connection might not be successful
-						if(j < 3 && i == (addresses.size()-1)){
+						if(j < 2 && i == (addresses.size()-1)){
 							j++;
 							i=0;
 						}
